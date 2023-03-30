@@ -1,0 +1,36 @@
+import numpy as np
+import csv 
+import re
+
+# Đọc dữ liệu từ tập tin SMSSpamCollection
+with open('SMSSpamCollection', 'r') as f:
+    messages = f.readlines()
+
+# Chọn chỉ các tin nhắn có từ khoá "buy" và "sex"
+keywords = ['buy', 'sex']
+messages = [m for m in messages if any(w in m.lower() for w in keywords)]
+
+# Tạo một ma trận đặc trưng
+features = np.zeros((len(messages), len(keywords)))
+for i, m in enumerate(messages):
+    features[i] = [len(re.findall(r'\b{}\b'.format(w), m.lower())) for w in keywords]
+
+# Chuyển đổi nhãn "spam" và "ham" sang giá trị số 1 và 0
+labels = np.zeros(len(messages), dtype=int)
+for i, m in enumerate(messages):
+    if m.startswith('spam'):
+        labels[i] = 1
+        
+# Ghi dữ liệu vào file CSV
+data = np.concatenate((features, labels.reshape(-1, 1)), axis=1)
+with open('sms_spam_perceptron.csv', 'w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(keywords + ['label'])  # Ghi header của file CSV
+    writer.writerows(data)  # Ghi dữ liệu vào file CSV
+
+
+
+
+
+
+
