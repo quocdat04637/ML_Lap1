@@ -1,0 +1,33 @@
+import pandas as pd
+import numpy as np
+
+#Tiến hành tải tập tin trên, thông qua thư viện pandas trích xuất Dataframe các giá trị 
+#tương ứng thông qua iloc()
+df = pd.read_csv('sms_spam_perceptron.csv')
+y = df.iloc[:, :1].values
+y = np.where(y == 'spam', -1, 1).ravel()
+X = df.iloc[:, [1, 2]].values
+
+
+#X = X.transpose()
+#Trước khi đưa vào Perceptron, ta chia dữ liệu thành train và test.
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+
+
+#Khi khởi tạo biến p, ta chọn số lần lập tối đa là 40 (max_iter = 40), tốc độ học learning 
+#rate (eta0 = 0.1). Cuối cùng dung phương fit để đưa dữ liệu vào huấn luyện cho p.
+
+from sklearn.svm import SVC 
+svm = SVC(kernel='linear', C=1.0, random_state=0)
+svm.fit(X_train, y_train)
+
+
+
+#Bây giờ ta có thể đánh giá các giá trị của dữ liệu test bằng phương thức predict().
+y_pred = svm.predict(X_test)
+
+#Ta có thể xác minh các đánh giá trên do Perceptron trả về
+from sklearn.metrics import accuracy_score
+print('Misclassified samples: %d' % (y_test != y_pred).sum())
+print('Accuracy: %.2f' % accuracy_score(y_test, y_pred))
